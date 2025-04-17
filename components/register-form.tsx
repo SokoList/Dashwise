@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons"
 import { Divider } from "@/components/ui/divider"
-import type { GoogleUser } from "@/lib/google-auth"
+import type { UserSession } from "@/lib/auth-utils"
 
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
@@ -102,15 +102,10 @@ export function RegisterForm() {
     }
   }
 
-  const handleSocialAuthSuccess = (provider: string, response: { token: string; user: GoogleUser }) => {
-    console.log(`Successfully authenticated with ${provider}`, response)
+  const handleSocialAuthSuccess = (provider: string, session: UserSession) => {
+    console.log(`Successfully authenticated with ${provider}`, session)
 
-    // In a real application, you would:
-    // 1. Send the token to your backend for verification
-    // 2. Create or authenticate the user
-    // 3. Set up a session or JWT token for the user
-
-    // For now, we'll just redirect to the dashboard
+    // Redirect to dashboard
     router.push("/dashboard")
   }
 

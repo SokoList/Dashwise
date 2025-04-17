@@ -6,13 +6,14 @@ import { Loader2 } from "lucide-react"
 import {
   type GoogleCredentialResponse,
   loadGoogleScript,
-  parseGoogleJwt,
   initializeGoogleOneTap,
   renderGoogleButton,
+  debugGoogleAuth,
 } from "@/lib/google-auth"
+import { verifyGoogleToken, storeSession, type UserSession } from "@/lib/auth-utils"
 
 type SocialAuthButtonsProps = {
-  onSuccess?: (provider: string, response: any) => void
+  onSuccess?: (provider: string, session: UserSession) => void
   onError?: (provider: string, error: any) => void
   mode?: "signin" | "signup"
 }
@@ -27,6 +28,8 @@ export function SocialAuthButtons({ onSuccess, onError, mode = "signup" }: Socia
       try {
         await loadGoogleScript()
         setIsGoogleScriptLoaded(true)
+        // Add debugging information
+        debugGoogleAuth()
       } catch (error) {
         console.error("Failed to load Google script:", error)
         onError?.("google", error)
@@ -39,18 +42,22 @@ export function SocialAuthButtons({ onSuccess, onError, mode = "signup" }: Socia
   useEffect(() => {
     if (!isGoogleScriptLoaded || !googleButtonRef.current) return
 
-    const handleGoogleResponse = (response: GoogleCredentialResponse) => {
+    const handleGoogleResponse = async (response: GoogleCredentialResponse) => {
       setIsLoading(true)
-      try {
-        // Parse the JWT token to get user information
-        const userData = parseGoogleJwt(response.credential)
 
-        // In a real application, you would send this token to your backend
-        // for verification and to create/authenticate the user
-        onSuccess?.("google", {
-          token: response.credential,
-          user: userData,
-        })
+      try {
+        // Verify the token with our backend
+        const authResponse = await verifyGoogleToken(response.credential)
+
+        if (!authResponse.success || !authResponse.session) {
+          throw new Error(authResponse.message || authResponse.error || "Authentication failed")
+        }
+
+        // Store the session
+        storeSession(authResponse.session)
+
+        // Call the onSuccess callback
+        onSuccess?.("google", authResponse.session)
       } catch (error) {
         console.error("Google authentication error:", error)
         onError?.("google", error)
