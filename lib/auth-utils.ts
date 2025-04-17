@@ -1,92 +1,43 @@
-// Interface for the session object
-export interface UserSession {
-  user: {
-    id: string
-    email: string
-    name: string
-    givenName: string
-    familyName: string
-    picture: string
-    emailVerified: boolean
-  }
-  expires: string
-}
+// Simple client-side auth utilities
 
-// Interface for the authentication response
-export interface AuthResponse {
-  success: boolean
-  session?: UserSession
-  error?: string
-  message?: string
-}
-
-// Function to verify Google token with our backend
-export async function verifyGoogleToken(token: string): Promise<AuthResponse> {
-  try {
-    const response = await fetch("/api/auth/google", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ token }),
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.message || data.error || "Authentication failed")
-    }
-
-    return data
-  } catch (error: any) {
-    console.error("Error verifying Google token:", error)
-    return {
-      success: false,
-      error: "Authentication failed",
-      message: error.message,
-    }
-  }
-}
-
-// Function to store session in localStorage
-export function storeSession(session: UserSession): void {
+// Store authentication state in localStorage
+export const setAuthState = (user: any) => {
   if (typeof window !== "undefined") {
-    localStorage.setItem("dashwise_session", JSON.stringify(session))
+    localStorage.setItem(
+      "dashwise_auth",
+      JSON.stringify({
+        isAuthenticated: true,
+        user,
+        timestamp: Date.now(),
+      }),
+    )
   }
 }
 
-// Function to retrieve session from localStorage
-export function getSession(): UserSession | null {
+// Get authentication state
+export const getAuthState = () => {
   if (typeof window !== "undefined") {
-    const sessionData = localStorage.getItem("dashwise_session")
-    if (sessionData) {
+    const authData = localStorage.getItem("dashwise_auth")
+    if (authData) {
       try {
-        const session = JSON.parse(sessionData) as UserSession
-
-        // Check if session has expired
-        if (new Date(session.expires) < new Date()) {
-          localStorage.removeItem("dashwise_session")
-          return null
-        }
-
-        return session
-      } catch (error) {
-        console.error("Error parsing session data:", error)
-        return null
+        return JSON.parse(authData)
+      } catch (e) {
+        return { isAuthenticated: false }
       }
     }
   }
-  return null
+  return { isAuthenticated: false }
 }
 
-// Function to clear session from localStorage
-export function clearSession(): void {
+// Clear authentication state
+export const clearAuthState = () => {
   if (typeof window !== "undefined") {
-    localStorage.removeItem("dashwise_session")
+    localStorage.removeItem("dashwise_auth")
   }
 }
 
-// Function to check if user is authenticated
-export function isAuthenticated(): boolean {
-  return getSession() !== null
+// Check if user is authenticated
+export const isAuthenticated = () => {
+  const authState = getAuthState()
+  return authState.isAuthenticated === true
 }

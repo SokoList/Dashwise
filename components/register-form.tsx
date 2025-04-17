@@ -12,7 +12,8 @@ import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons"
 import { Divider } from "@/components/ui/divider"
-import type { UserSession } from "@/lib/auth-utils"
+import type { GoogleUser } from "@/lib/google-auth"
+import { setAuthState } from "@/lib/auth-utils"
 
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
@@ -102,11 +103,22 @@ export function RegisterForm() {
     }
   }
 
-  const handleSocialAuthSuccess = (provider: string, session: UserSession) => {
-    console.log(`Successfully authenticated with ${provider}`, session)
+  const handleSocialAuthSuccess = (provider: string, response: { token: string; user: GoogleUser }) => {
+    console.log(`Successfully authenticated with ${provider}`, response.user.email)
 
-    // Redirect to dashboard
-    router.push("/dashboard")
+    // Store auth state
+    setAuthState({
+      email: response.user.email,
+      name: response.user.name,
+      picture: response.user.picture,
+      provider,
+    })
+
+    // Force navigation to dashboard
+    console.log("Redirecting to dashboard...")
+    setTimeout(() => {
+      window.location.href = "/dashboard"
+    }, 100)
   }
 
   const handleSocialAuthError = (provider: string, error: any) => {

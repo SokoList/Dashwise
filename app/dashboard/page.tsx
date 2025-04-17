@@ -1,38 +1,34 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { useAuth } from "@/contexts/auth-context"
-import { useEffect } from "react"
+import { isAuthenticated, getAuthState, clearAuthState } from "@/lib/auth-utils"
 import { useRouter } from "next/navigation"
 
 export default function DashboardPage() {
-  const { session, isAuthenticated, isLoading, logout } = useAuth()
+  const [user, setUser] = useState<any>(null)
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect to login if not authenticated
-    if (!isLoading && !isAuthenticated) {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
       router.push("/login")
+      return
     }
-  }, [isLoading, isAuthenticated, router])
 
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-slate-600">Loading...</p>
-        </div>
-      </div>
-    )
+    // Get user data
+    const authState = getAuthState()
+    setUser(authState.user)
+  }, [router])
+
+  const handleSignOut = () => {
+    clearAuthState()
+    router.push("/")
   }
 
-  // If not authenticated, don't render the dashboard
-  // (the useEffect will handle the redirect)
-  if (!isAuthenticated) {
-    return null
+  if (!user) {
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading...</div>
   }
 
   return (
@@ -41,14 +37,14 @@ export default function DashboardPage() {
         <div className="container max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold">Dashwise</h1>
           <div className="flex items-center gap-4">
-            {session?.user?.picture && (
+            {user?.picture && (
               <img
-                src={session.user.picture || "/placeholder.svg"}
-                alt={session.user.name || "User"}
+                src={user.picture || "/placeholder.svg"}
+                alt={user.name || "User"}
                 className="w-8 h-8 rounded-full"
               />
             )}
-            <Button variant="outline" onClick={logout}>
+            <Button variant="outline" onClick={handleSignOut}>
               Sign Out
             </Button>
           </div>
@@ -57,7 +53,9 @@ export default function DashboardPage() {
 
       <main className="flex-1 container max-w-screen-xl mx-auto px-4 py-12">
         <div className="bg-white rounded-lg border shadow-sm p-8">
-          <h2 className="text-2xl font-bold mb-4">Welcome to Dashwise, {session?.user?.name}!</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Welcome to Dashwise{user?.name ? `, ${user.name.split(" ")[0]}` : ""}!
+          </h2>
           <p className="text-slate-600 mb-6">
             Your account has been successfully authenticated. This is your dashboard page.
           </p>
