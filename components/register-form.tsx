@@ -94,7 +94,14 @@ export function RegisterForm() {
       // to create a new user account
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      // Redirect to onboarding or dashboard
+      // Store auth state
+      setAuthState({
+        email: formData.email,
+        name: `${formData.firstName} ${formData.lastName}`,
+        isAuthenticated: true,
+      })
+
+      // Redirect to dashboard
       router.push("/dashboard")
     } catch (error) {
       console.error("Registration error:", error)
@@ -112,6 +119,7 @@ export function RegisterForm() {
       name: response.user.name,
       picture: response.user.picture,
       provider,
+      isAuthenticated: true,
     })
 
     // Force navigation to dashboard

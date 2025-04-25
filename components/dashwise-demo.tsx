@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
-import { BarChart3, PieChart, HelpCircle, Lightbulb, ListChecks, Database, FileText, Copy } from "lucide-react"
+import { Copy, Upload, BarChart, CheckCircle, FileText, Brain, Lightbulb } from "lucide-react"
+import { UploadZone } from "@/components/dashboard/upload-zone"
 
 export function DashwiseDemo() {
-  const [activeTab, setActiveTab] = useState("summary")
+  const [activeTab, setActiveTab] = useState("upload")
   const [isVisible, setIsVisible] = useState(false)
+  const [demoProgress, setDemoProgress] = useState(0)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -19,14 +21,38 @@ export function DashwiseDemo() {
     return () => clearTimeout(timer)
   }, [])
 
+  // Simulate progress when on analyze tab
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+
+    if (activeTab === "analyze") {
+      let progress = 0
+      interval = setInterval(() => {
+        progress += 5
+        if (progress > 90) {
+          clearInterval(interval as NodeJS.Timeout)
+          setDemoProgress(90)
+        } else {
+          setDemoProgress(progress)
+        }
+      }, 300)
+    } else if (activeTab === "act") {
+      setDemoProgress(100)
+    } else {
+      setDemoProgress(0)
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [activeTab])
+
   return (
     <section className="py-20 bg-white" id="demo">
       <div className="container px-4 md:px-6">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Experience Dashwise in Action</h2>
-          <p className="mt-4 text-gray-500 md:text-xl">
-            Explore our interactive demo to see how Dashwise transforms your data
-          </p>
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">HOW IT WORKS</h2>
+          <p className="mt-4 text-gray-500 md:text-xl">From chart to smart—how Dashwise helps you win</p>
         </div>
 
         <motion.div
@@ -36,49 +62,35 @@ export function DashwiseDemo() {
           className="relative mx-auto max-w-5xl rounded-xl border bg-white shadow-lg"
         >
           <div className="flex items-center justify-between border-b p-4">
-            <h3 className="text-xl font-semibold">Analysis Results</h3>
+            <h3 className="text-xl font-semibold">Dashboard Analysis</h3>
             <Button variant="outline" size="sm" className="gap-1.5">
               <Copy className="h-4 w-4" />
               Copy Analysis
             </Button>
           </div>
 
-          <Tabs defaultValue="summary" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-slate-50 p-0 h-auto">
+          <Tabs defaultValue="upload" value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-50 p-0 h-auto">
               <TabsTrigger
-                value="summary"
+                value="upload"
                 className="data-[state=active]:bg-white rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3 flex gap-2"
               >
-                <FileText className="h-4 w-4" />
-                Summary
+                <Upload className="h-4 w-4" />
+                1. Upload
               </TabsTrigger>
               <TabsTrigger
-                value="insights"
+                value="analyze"
                 className="data-[state=active]:bg-white rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3 flex gap-2"
               >
-                <Lightbulb className="h-4 w-4" />
-                Insights
+                <BarChart className="h-4 w-4" />
+                2. Analyze
               </TabsTrigger>
               <TabsTrigger
-                value="questions"
+                value="act"
                 className="data-[state=active]:bg-white rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3 flex gap-2"
               >
-                <HelpCircle className="h-4 w-4" />
-                Questions
-              </TabsTrigger>
-              <TabsTrigger
-                value="recommendations"
-                className="data-[state=active]:bg-white rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3 flex gap-2"
-              >
-                <ListChecks className="h-4 w-4" />
-                Recommendations
-              </TabsTrigger>
-              <TabsTrigger
-                value="data"
-                className="data-[state=active]:bg-white rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3 flex gap-2"
-              >
-                <Database className="h-4 w-4" />
-                Data Discovery
+                <CheckCircle className="h-4 w-4" />
+                3. Act
               </TabsTrigger>
             </TabsList>
 
@@ -90,20 +102,14 @@ export function DashwiseDemo() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
               >
-                <TabsContent value="summary" className="p-6">
-                  <SummaryTab />
+                <TabsContent value="upload" className="p-6">
+                  <UploadTab />
                 </TabsContent>
-                <TabsContent value="insights" className="p-6">
-                  <InsightsTab />
+                <TabsContent value="analyze" className="p-6">
+                  <AnalyzeTab progress={demoProgress} />
                 </TabsContent>
-                <TabsContent value="questions" className="p-6">
-                  <QuestionsTab />
-                </TabsContent>
-                <TabsContent value="recommendations" className="p-6">
-                  <RecommendationsTab />
-                </TabsContent>
-                <TabsContent value="data" className="p-6">
-                  <DataDiscoveryTab />
+                <TabsContent value="act" className="p-6">
+                  <ActTab />
                 </TabsContent>
               </motion.div>
             </AnimatePresence>
@@ -114,337 +120,209 @@ export function DashwiseDemo() {
   )
 }
 
-function SummaryTab() {
+function UploadTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-500">
-          <FileText className="h-5 w-5" />
+          <Upload className="h-5 w-5" />
         </div>
         <div>
-          <h3 className="text-xl font-semibold">Executive Summary</h3>
-          <p className="text-sm text-gray-500">A concise overview of the key findings from your dashboard</p>
+          <h3 className="text-xl font-semibold">Upload</h3>
+          <p className="text-sm text-gray-500">Drop in a screenshot or export of your dashboard.</p>
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-6">
-          <p className="text-gray-700">
-            The dashboard provides a comprehensive overview of contract management, highlighting key metrics such as the
-            number of contracts, revenue projections, and cost analysis. It presents a detailed comparison of costs
-            versus revenues over different time periods, alongside insights into contract statuses, industries, and
-            categories. This visualization is crucial for understanding financial performance and operational efficiency
-            in preparation for the upcoming meeting.
-          </p>
-
-          <h4 className="mt-6 mb-4 text-lg font-semibold">Key Metrics Overview</h4>
-          <ul className="space-y-2 list-disc pl-5">
-            <li className="text-gray-700">
-              <span className="font-medium">Number of Contracts:</span> 73
-            </li>
-            <li className="text-gray-700">
-              <span className="font-medium">Projected Revenues (Next 12 Months):</span> $13,920
-            </li>
-            <li className="text-gray-700">
-              <span className="font-medium">Projected Costs (Next 12 Months):</span> $35,750
-            </li>
-            <li className="text-gray-700">
-              <span className="font-medium">Contracts to Review:</span> 7 without milestones, 9 without tasks
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
+      {/* Actual upload zone from the dashboard */}
+      <UploadZone onFileUpload={() => {}} isUploading={false} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-slate-50 rounded-lg p-6 border">
-          <h4 className="text-lg font-medium mb-4">Cost vs. Revenue Trends</h4>
-          <div className="aspect-[4/3] bg-white rounded-md border p-4 flex items-center justify-center">
-            <BarChart3 className="h-32 w-32 text-slate-300" />
-          </div>
+          <h4 className="text-lg font-medium mb-4">Supported Formats</h4>
+          <ul className="space-y-2 list-disc pl-5">
+            <li className="text-gray-700">Dashboard screenshots (PNG, JPG)</li>
+            <li className="text-gray-700">PDF exports</li>
+            <li className="text-gray-700">Excel files (XLSX, XLS)</li>
+            <li className="text-gray-700">PowerPoint (PPTX, PPT)</li>
+          </ul>
         </div>
         <div className="bg-slate-50 rounded-lg p-6 border">
-          <h4 className="text-lg font-medium mb-4">Contract Distribution</h4>
-          <div className="aspect-[4/3] bg-white rounded-md border p-4 flex items-center justify-center">
-            <PieChart className="h-32 w-32 text-slate-300" />
-          </div>
+          <h4 className="text-lg font-medium mb-4">Compatible With</h4>
+          <ul className="space-y-2 list-disc pl-5">
+            <li className="text-gray-700">PowerBI</li>
+            <li className="text-gray-700">Excel</li>
+            <li className="text-gray-700">Tableau</li>
+            <li className="text-gray-700">Qlik</li>
+            <li className="text-gray-700">Google Analytics</li>
+          </ul>
         </div>
       </div>
     </div>
   )
 }
 
-function InsightsTab() {
+function AnalyzeTab({ progress }: { progress: number }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-amber-500">
-          <Lightbulb className="h-5 w-5" />
+          <BarChart className="h-5 w-5" />
         </div>
         <div>
-          <h3 className="text-xl font-semibold">Key Insights</h3>
-          <p className="text-sm text-gray-500">Important findings and patterns identified in your dashboard</p>
+          <h3 className="text-xl font-semibold">Analyze</h3>
+          <p className="text-sm text-gray-500">Dashwise AI breaks it down into insights + next steps.</p>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold text-blue-700">High Cost Over Revenue in Long-term Projections</h4>
-            <p className="text-blue-600 mt-1">5-year costs: -84, revenues: 16</p>
-            <div className="flex justify-between items-center mt-3">
-              <span className="text-sm px-3 py-1 bg-blue-100 text-blue-700 rounded-full">Finance</span>
-              <span className="text-sm text-blue-600">Source: Cost vs. Revenues by year chart</span>
+      {/* Actual analysis progress component from the dashboard */}
+      <Card className="mt-4">
+        <CardContent className="p-6">
+          <div className="space-y-6">
+            <div className="flex justify-between mb-2">
+              <span className="text-sm font-medium">Analyzing your dashboard...</span>
+              <span className="text-sm font-medium">{Math.round(progress)}%</span>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold text-blue-700">
-              Significant Portion of Contracts Pending or Terminated
-            </h4>
-            <p className="text-blue-600 mt-1">Pending: 28%, Terminated: 17%</p>
-            <div className="flex justify-between items-center mt-3">
-              <span className="text-sm px-3 py-1 bg-blue-100 text-blue-700 rounded-full">Operations</span>
-              <span className="text-sm text-blue-600">Source: Contracts status pie chart</span>
+            <div className="w-full bg-slate-100 rounded-full h-2.5">
+              <div
+                className="bg-primary h-2.5 rounded-full transition-all duration-300 ease-in-out"
+                style={{ width: `${progress}%` }}
+              ></div>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold text-blue-700">Consulting Services Lead in Industry Contracts</h4>
-            <p className="text-blue-600 mt-1">Consulting Services: 33%</p>
-            <div className="flex justify-between items-center mt-3">
-              <span className="text-sm px-3 py-1 bg-blue-100 text-blue-700 rounded-full">Market</span>
-              <span className="text-sm text-blue-600">Source: Contracts by industry pie chart</span>
+            <div className="space-y-4">
+              {[
+                {
+                  id: 0,
+                  name: "Processing file",
+                  icon: FileText,
+                  description: "Extracting data from your dashboard...",
+                  isActive: progress < 25,
+                  isComplete: progress >= 25,
+                },
+                {
+                  id: 1,
+                  name: "Analyzing metrics",
+                  icon: BarChart,
+                  description: "Identifying key metrics and trends...",
+                  isActive: progress >= 25 && progress < 50,
+                  isComplete: progress >= 50,
+                },
+                {
+                  id: 2,
+                  name: "Generating insights",
+                  icon: Brain,
+                  description: "Discovering patterns and anomalies...",
+                  isActive: progress >= 50 && progress < 75,
+                  isComplete: progress >= 75,
+                },
+                {
+                  id: 3,
+                  name: "Creating recommendations",
+                  icon: Lightbulb,
+                  description: "Formulating strategic recommendations...",
+                  isActive: progress >= 75,
+                  isComplete: progress >= 95,
+                },
+              ].map((step) => {
+                const StepIcon = step.icon
+                return (
+                  <div key={step.id} className="flex items-start gap-3">
+                    <div
+                      className={`rounded-full p-1.5 ${step.isComplete ? "bg-green-100" : step.isActive ? "bg-blue-100" : "bg-slate-100"}`}
+                    >
+                      {step.isComplete ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : step.isActive ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                        >
+                          <StepIcon className="h-5 w-5 text-blue-600" />
+                        </motion.div>
+                      ) : (
+                        <StepIcon className="h-5 w-5 text-slate-400" />
+                      )}
+                    </div>
+                    <div>
+                      <p
+                        className={`font-medium ${step.isComplete ? "text-green-600" : step.isActive ? "text-blue-600" : "text-slate-500"}`}
+                      >
+                        {step.name}
+                      </p>
+                      {step.isActive && <p className="text-sm text-slate-500">{step.description}</p>}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
 
-function QuestionsTab() {
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-50 text-purple-500">
-          <HelpCircle className="h-5 w-5" />
-        </div>
-        <div>
-          <h3 className="text-xl font-semibold">Strategic Questions</h3>
-          <p className="text-sm text-gray-500">Key questions to guide your decision-making process</p>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold text-purple-700">
-              How can we reduce the cost disparity in long-term projections?
-            </h4>
-            <p className="text-purple-600 mt-1">The 5-year cost vs. revenue analysis shows a significant gap.</p>
-            <div className="mt-3">
-              <span className="text-sm px-3 py-1 bg-purple-100 text-purple-700 rounded-full">Finance</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold text-purple-700">
-              What strategies can be implemented to decrease the number of pending contracts?
-            </h4>
-            <p className="text-purple-600 mt-1">28% of contracts are currently pending, impacting operational flow.</p>
-            <div className="mt-3">
-              <span className="text-sm px-3 py-1 bg-purple-100 text-purple-700 rounded-full">Operations</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold text-purple-700">
-              How can we diversify our industry focus beyond consulting services?
-            </h4>
-            <p className="text-purple-600 mt-1">
-              Consulting services account for 33% of contracts, indicating a potential over-reliance.
-            </p>
-            <div className="mt-3">
-              <span className="text-sm px-3 py-1 bg-purple-100 text-purple-700 rounded-full">Market</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
-
-function RecommendationsTab() {
+function ActTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-500">
-          <ListChecks className="h-5 w-5" />
+          <CheckCircle className="h-5 w-5" />
         </div>
         <div>
-          <h3 className="text-xl font-semibold">Recommendations</h3>
-          <p className="text-sm text-gray-500">Suggested actions based on the dashboard analysis</p>
+          <h3 className="text-xl font-semibold">Act</h3>
+          <p className="text-sm text-gray-500">
+            Copy what matters. Ask the right questions. Look like the smartest person in the room.
+          </p>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <Card className="bg-green-50 border-green-100">
+      {/* Actual analysis results UI from the dashboard */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Executive Summary</CardTitle>
+          <CardDescription>Key insights from your dashboard</CardDescription>
+        </CardHeader>
+        <CardContent className="prose">
+          <p>
+            This Q1 Sales Dashboard provides a comprehensive overview of sales performance across different regions and
+            product categories. The data shows strong performance in the Western region, particularly in the Electronics
+            category, while the Southern region is underperforming compared to targets. Overall revenue is trending
+            upward with a 12% increase compared to the previous quarter.
+          </p>
+          <p>Key metrics indicate positive momentum:</p>
+          <ul>
+            <li>Total Revenue: $1.2M (↑12% QoQ)</li>
+            <li>Units Sold: 8,450 (↑8% QoQ)</li>
+            <li>Average Order Value: $142 (↑4% QoQ)</li>
+            <li>Customer Acquisition Cost: $38 (↓5% QoQ)</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="bg-blue-50 border-blue-100">
           <CardContent className="p-6">
-            <h4 className="text-lg font-semibold text-green-700">
-              Implement cost-control measures for long-term projects.
-            </h4>
-            <p className="text-green-600 mt-1">
-              Reducing costs in the 5-year projection will improve financial stability.
+            <h4 className="text-lg font-semibold text-blue-700">Western Region Outperforming</h4>
+            <p className="text-blue-600 mt-1">
+              The Western region is exceeding targets by 18%, driven primarily by strong electronics sales.
             </p>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="flex items-center gap-1 text-red-500">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-alert-triangle"
-                >
-                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-                  <path d="M12 9v4" />
-                  <path d="M12 17h.01" />
-                </svg>
-                <span className="text-sm font-medium">Risk:</span>
-              </div>
-              <span className="text-sm text-red-500">
-                Potential reduction in service quality if cost-cutting is too aggressive.
-              </span>
+            <div className="flex items-center gap-2 mt-2 text-xs text-blue-500">
+              <span className="bg-blue-100 px-2 py-0.5 rounded">Regional Performance</span>
+              <span>Source: Regional Sales Chart</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-green-50 border-green-100">
+        <Card className="bg-purple-50 border-purple-100">
           <CardContent className="p-6">
-            <h4 className="text-lg font-semibold text-green-700">
-              Streamline contract approval processes to reduce pending contracts.
-            </h4>
-            <p className="text-green-600 mt-1">
-              Improving efficiency in contract management will enhance operational performance.
+            <h4 className="text-lg font-semibold text-purple-700">What factors are driving Western region success?</h4>
+            <p className="text-purple-600 mt-1">
+              Understanding the specific strategies and market conditions could help replicate success elsewhere.
             </p>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="flex items-center gap-1 text-red-500">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-alert-triangle"
-                >
-                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-                  <path d="M12 9v4" />
-                  <path d="M12 17h.01" />
-                </svg>
-                <span className="text-sm font-medium">Risk:</span>
-              </div>
-              <span className="text-sm text-red-500">
-                Possible initial increase in workload for contract management teams.
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-green-50 border-green-100">
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold text-green-700">
-              Explore new industry opportunities to balance contract distribution.
-            </h4>
-            <p className="text-green-600 mt-1">
-              Diversifying industry focus can mitigate risks associated with market changes.
-            </p>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="flex items-center gap-1 text-red-500">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-alert-triangle"
-                >
-                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-                  <path d="M12 9v4" />
-                  <path d="M12 17h.01" />
-                </svg>
-                <span className="text-sm font-medium">Risk:</span>
-              </div>
-              <span className="text-sm text-red-500">
-                Entering new markets may require additional resources and expertise.
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
-
-function DataDiscoveryTab() {
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-          <Database className="h-5 w-5" />
-        </div>
-        <div>
-          <h3 className="text-xl font-semibold">Data Discovery</h3>
-          <p className="text-sm text-gray-500">Additional data needed for a complete picture</p>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <Card>
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold">Detailed Cost Breakdown by Project</h4>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-              <span className="text-gray-600">Financial department reports or project management software</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold">Contract Approval Time Metrics</h4>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-              <span className="text-gray-600">Contract management system or workflow analysis tools</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h4 className="text-lg font-semibold">Industry Market Trends</h4>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-              <span className="text-gray-600">Market research reports or industry analysis platforms</span>
+            <div className="mt-2 text-xs">
+              <span className="bg-purple-100 text-purple-500 px-2 py-0.5 rounded">Strategy</span>
             </div>
           </CardContent>
         </Card>

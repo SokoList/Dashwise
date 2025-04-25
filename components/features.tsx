@@ -1,40 +1,32 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Database, FileText, Zap, Brain, TrendingUp, Layers } from "lucide-react"
+import { FileText, Zap, HelpCircle, Layout } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 export function Features() {
   const features = [
     {
-      icon: <Brain className="h-6 w-6" />,
-      title: "AI-Powered Analysis",
-      description: "Our advanced AI analyzes your data to uncover hidden patterns and insights you might miss.",
+      icon: <FileText className="h-6 w-6" />,
+      title: "Auto-Summarization",
+      description: "One-click summaries that surface key insights—no analysis paralysis.",
     },
     {
       icon: <Zap className="h-6 w-6" />,
-      title: "Instant Insights",
-      description: "Get immediate answers to your business questions without complex data manipulation.",
+      title: "Key Takeaways",
+      description: "Instant bullets on trends, anomalies, and red flags—perfect for copy-paste into slides or Slack.",
     },
     {
-      icon: <TrendingUp className="h-6 w-6" />,
-      title: "Strategic Recommendations",
-      description: "Receive actionable recommendations to improve your business performance.",
+      icon: <HelpCircle className="h-6 w-6" />,
+      title: "Suggested Questions",
+      description:
+        "AI-crafted prompts to spark meaningful discussion in your next meeting and position you as the data-savvy leader.",
     },
     {
-      icon: <Layers className="h-6 w-6" />,
-      title: "Comprehensive Dashboards",
-      description: "Visualize your data with beautiful, interactive dashboards that tell the complete story.",
-    },
-    {
-      icon: <FileText className="h-6 w-6" />,
-      title: "Executive Summaries",
-      description: "Get concise overviews of key metrics and insights for quick decision-making.",
-    },
-    {
-      icon: <Database className="h-6 w-6" />,
-      title: "Data Integration",
-      description: "Connect with your existing tools and data sources for a unified view of your business.",
+      icon: <Layout className="h-6 w-6" />,
+      title: "Intuitive Design",
+      description:
+        "A clean, distraction‑free interface that requires zero training—dashboards have never felt this approachable.",
     },
   ]
 
@@ -42,13 +34,13 @@ export function Features() {
     <section className="py-20 bg-slate-50">
       <div className="container px-4 md:px-6">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Powerful Features</h2>
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Features & Benefits</h2>
           <p className="mt-4 text-gray-500 md:text-xl">
-            Discover how Dashwise transforms your data into actionable insights
+            Everything you need to transform complex dashboards into actionable insights
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {features.map((feature, index) => (
             <motion.div
               key={index}

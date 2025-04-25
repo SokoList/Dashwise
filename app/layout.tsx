@@ -1,10 +1,12 @@
-import type { Metadata } from 'next'
-import './globals.css'
+import type React from "react"
+import type { Metadata } from "next"
+import { Header } from "@/components/header"
+import "./globals.css"
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: "Dashwise: AI Dashboard Insights for Managers",
+  description: "Simplify your dashboards into clear, actionable insights. Join Dashwise's waitlist today.",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -13,8 +15,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className="scroll-smooth">
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <Header />
+        {children}
+      </body>
     </html>
   )
 }

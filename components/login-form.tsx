@@ -76,6 +76,13 @@ export function LoginForm() {
       // to authenticate the user
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
+      // Store auth state
+      setAuthState({
+        email: formData.email,
+        name: "User",
+        isAuthenticated: true,
+      })
+
       // Redirect to dashboard
       router.push("/dashboard")
     } catch (error) {
@@ -94,6 +101,7 @@ export function LoginForm() {
       name: response.user.name,
       picture: response.user.picture,
       provider,
+      isAuthenticated: true,
     })
 
     // Force navigation to dashboard
